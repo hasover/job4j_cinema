@@ -98,9 +98,6 @@ public class SqlStore implements Store {
                 statement.setInt(3, ticket.getCell());
                 statement.setInt(4, ticket.getAccountId());
                 statement.execute();
-                try (ResultSet resultSet = statement.getGeneratedKeys()) {
-                    resultSet.next();
-                }
             }
             connection.commit();
         }  catch (SQLException exception) {
@@ -109,5 +106,4 @@ public class SqlStore implements Store {
         }
         return true;
     }
-
 }
