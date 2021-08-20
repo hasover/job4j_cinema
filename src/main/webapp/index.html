@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+</head>
+<body>
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script>
+    setTimeout(() => {
+        location = ''
+    },60000)
+    $(document).ready(() => {
+        $.ajax({
+            type: 'GET',
+            url: 'hall.do',
+            data: {'sessionId': document.querySelector('table').getAttribute('sessionId')},
+            dataType: 'json'
+        }).done((data) => {
+            const rows = data.rows;
+            const cells = data.cells;
+            let tHead = document.querySelector('table').tHead.children[0];
+            for (let i = 1; i <= cells; i++) {
+                tHead.insertCell(i).outerHTML = `<th>${i}</th>`
+            }
+            for (let i = 1; i <= rows; i++) {
+                let newRow = document.querySelector('table').insertRow(i)
+                newRow.insertCell(0).outerHTML = `<th>${i}</th>`
+                for (let j = 1; j <= cells; j++) {
+                    newRow.insertCell(j).outerHTML = `<td><input class="messageCheckbox" type="checkbox" name="place" value="${i}${j}"> Ряд ${i}, Место ${j} </td>`
+                }
+            }
+            const tickets = JSON.parse(data.tickets)
+            console.dir(tickets)
+            for (let ticket of tickets) {
+                let tdInput = document.querySelector(`[value = '${ticket.row}${ticket.cell}']`)
+                tdInput.disabled = true
+                tdInput.parentElement.style.backgroundColor = 'red'
+            }
+        })
+    })
+    function process() {
+        const selected = document.getElementsByClassName('messageCheckbox');
+        const params = []
+        for(let i = 0; i < selected.length; ++i){
+            if(selected[i].checked){
+                params.push(selected[i].value)
+            }
+        }
+        if (params.length === 0) {
+            alert('Нужно выбрать хотя бы одно место.')
+            return false
+        }
+        sessionStorage.setItem('selectedTickets', params.toString())
+        sessionStorage.setItem('sessionId', document.querySelector('table').getAttribute('sessionId'))
+        window.location.href ='http://localhost:8080/job4j_cinema/payment.html'
+    }
+</script>
+
+<div class="container">
+    <div class="row pt-3">
+        <h4>
+            Бронирование месте на сеанс
+        </h4>
+        <table class="table table-bordered" sessionId = "1">
+            <thead>
+            <tr>
+                <th  style="width: 120px;">Ряд / Место</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="row float-right">
+        <button type="button" class="btn btn-success" onclick="return process();">Оплатить</button>
+    </div>
+</div>
+</body>
+</html>
